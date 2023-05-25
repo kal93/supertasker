@@ -1,5 +1,6 @@
 import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit';
 import data from '../api/data.json';
+import { removeUserAction } from './users-slice';
 
 export type TasksState = {
   entities: Task[];
@@ -7,7 +8,7 @@ export type TasksState = {
 
 type DraftTask = RequireOnly<Task, 'title'>;
 
-const createTask = (draftTask: DraftTask): Task => {
+export const createTask = (draftTask: DraftTask): Task => {
   return { id: nanoid(), ...draftTask };
 };
 
@@ -30,6 +31,17 @@ const tasksSlice = createSlice({
       state.entities.splice(index, 1);
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(removeUserAction, (state, action) => {
+      // operations here have to be immutable. No Immer here by default
+      const userId = action.payload;
+      for(const task of state.entities) {
+        if(task.user === userId) {
+          task.user = undefined;
+        }
+      }
+    })
+  }
 });
 
 export const tasksReducer = tasksSlice.reducer;
